@@ -1,0 +1,16 @@
+text,label,category
+AssertionError: expected 2 got 3,Test:Failure:Assertion,Test Failures
+assert user.is_active == True failed,Test:Failure:Assertion,Test Failures
+Connection timed out after 30 seconds,Infra:Network:Timeout,Network Issues
+java.net.SocketTimeoutException: Read timed out,Infra:Network:Timeout,Network Issues
+DNS resolution failed for hostname api.example.com,Infra:Network:DNS,Network Issues
+compilation failed: cannot find symbol,Infra:Build:Compilation,Build Issues
+BUILD FAILED due to compile errors,Infra:Build:Compilation,Build Issues
+ModuleNotFoundError: No module named requests,Infra:Build:Dependencies,Build Issues
+package not found: com.example.utils,Infra:Build:Dependencies,Build Issues
+Test timeout: test_long_running_operation,Test:Failure:Timeout,Test Failures
+OutOfMemoryError: Java heap space,Infra:Resource:Memory,Resource Issues
+authentication failed: invalid credentials,Security:Authentication,Security Issues
+SSL certificate verification failed,Security:Certificate,Security Issues
+database connection timeout,Database:Connection,Database Issues
+SQL syntax error near SELECT,Database:Query,Database Issues

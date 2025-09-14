@@ -1,0 +1,5 @@
+Sample_ID,Failure_Type,Expected_Label,Expected_Confidence,Key_Indicators,Commits_Attribution,Attribution_Score,Tests_Detected,Description
+B001_TEST_ASSERTION,Test Assertion Failure,Test:Failure:Assertion,0.85,"AssertionError, assert, expected 2 got 3",a1b2c3d4 (john.doe@example.com),8,test_user_authentication,Unit test failure with clear assertion error message and stack trace
+B002_NETWORK_TIMEOUT,Network Infrastructure Issue,Infra:Network:Timeout,0.92,"Connection timed out, SocketTimeoutException, Read timed out",x9y8z7w6 (network.team@example.com),7,test_api_integration,Integration test failure due to network connectivity timeouts
+B003_COMPILE_ERROR,Build Compilation Error,Infra:Build:Compilation,0.89,"COMPILATION ERROR, cannot find symbol, BUILD FAILED",m5n6o7p8 (dev.team@example.com),6,None,Java compilation failure due to missing method in refactored code
+B004_UNCLASSIFIED,Generic/Unclassified Failure,UNCLASSIFIED,0.23,"Something went wrong, Process exited with code 1",q1r2s3t4 (release.team@example.com),1,None,Low confidence case with generic error messages requiring ML or manual review
