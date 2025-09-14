@@ -1,0 +1,139 @@
+# Automated Fault Tracing - Failure Taxonomy
+# Hierarchical failure codes with indicator strings for pattern matching
+
+Test:
+  Failure:
+    Assertion:
+      indicators:
+        - "AssertionError"
+        - "assert"
+        - "expected"
+        - "actual" 
+        - "assertion failed"
+        - "assert_equal"
+        - "assert_true"
+        - "assert_false"
+
+    Timeout:
+      indicators:
+        - "timeout"
+        - "timed out"
+        - "TimeoutException"
+        - "test timeout"
+        - "execution timeout"
+
+    Exception:
+      indicators:
+        - "Exception"
+        - "Error"
+        - "failed"
+        - "Test failed"
+        - "RuntimeError"
+        - "ValueError"
+        - "TypeError"
+
+Infra:
+  Network:
+    Timeout:
+      indicators:
+        - "connection timeout"
+        - "network timeout"
+        - "read timed out"
+        - "Connection timed out"
+        - "socket timeout"
+        - "HTTP timeout"
+        - "SSL timeout"
+
+    DNS:
+      indicators:
+        - "DNS resolution"
+        - "name resolution"
+        - "hostname"
+        - "DNS lookup"
+        - "resolve hostname"
+        - "getaddrinfo"
+
+    Connection:
+      indicators:
+        - "connection refused"
+        - "connection reset"
+        - "network unreachable"
+        - "host unreachable"
+        - "connection failed"
+
+  Build:
+    Compilation:
+      indicators:
+        - "compilation failed"
+        - "build failed"
+        - "compile error"
+        - "syntax error"
+        - "compilation error"
+        - "javac"
+        - "gcc error"
+
+    Dependencies:
+      indicators:
+        - "dependency"
+        - "package not found"
+        - "module not found"
+        - "import error"
+        - "missing dependency"
+        - "unresolved dependency"
+        - "ClassNotFoundException"
+        - "ModuleNotFoundError"
+
+  Resource:
+    Memory:
+      indicators:
+        - "out of memory"
+        - "OutOfMemoryError" 
+        - "memory limit"
+        - "heap space"
+        - "memory exceeded"
+
+    Disk:
+      indicators:
+        - "disk space"
+        - "no space left"
+        - "disk full"
+        - "storage exceeded"
+        - "quota exceeded"
+
+Security:
+  Authentication:
+    indicators:
+      - "authentication failed"
+      - "unauthorized"
+      - "invalid credentials"
+      - "login failed"
+      - "access denied"
+      - "401"
+      - "403"
+
+  Certificate:
+    indicators:
+      - "certificate"
+      - "SSL"
+      - "TLS"
+      - "handshake"
+      - "certificate verification"
+      - "certificate expired"
+
+Database:
+  Connection:
+    indicators:
+      - "database connection"
+      - "connection pool"
+      - "database timeout"
+      - "database unreachable"
+      - "DB connection failed"
+
+  Query:
+    indicators:
+      - "SQL"
+      - "query failed"
+      - "syntax error"
+      - "table doesn't exist"
+      - "constraint violation"
+      - "deadlock"
