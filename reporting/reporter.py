@@ -1,0 +1,229 @@
+"""
+Report generation module
+Generates markdown and PDF reports for build analysis
+"""
+
+import subprocess
+import tempfile
+import os
+from typing import Optional
+from models.pydantic_models import BuildRecord
+
+class ReportGenerator:
+    """Generates reports for build analysis"""
+
+    def __init__(self):
+        pass
+
+    def generate_markdown_report(self, build_record: BuildRecord) -> str:
+        """
+        Generate markdown report for build
+
+        Args:
+            build_record: Complete build record
+
+        Returns:
+            Markdown-formatted report string
+        """
+        report_lines = []
+
+        # Header
+        report_lines.extend([
+            f"# Build Analysis Report",
+            f"",
+            f"**Build ID:** {build_record.build_id}",
+            f"**Analysis Date:** {self._format_timestamp(build_record.ingested_at)}",
+            f"",
+            f"## Classification Results",
+            f"",
+            f"- **Label:** {build_record.label}",
+            f"- **Confidence:** {build_record.confidence:.2f}",
+            f""
+        ])
+
+        # Scores breakdown
+        if build_record.scores:
+            report_lines.extend([
+                f"### Score Breakdown",
+                f""
+            ])
+
+            sorted_scores = sorted(build_record.scores.items(), 
+                                 key=lambda x: x[1], reverse=True)
+
+            for category, score in sorted_scores:
+                if score > 0:
+                    report_lines.append(f"- **{category}:** {score}")
+
+            report_lines.append("")
+
+        # Summary
+        if build_record.summary:
+            summary_data = build_record.summary
+            report_lines.extend([
+                f"## Summary",
+                f"",
+                f"{summary_data.get('summary', 'No summary available')}",
+                f""
+            ])
+
+            # Exceptions
+            if summary_data.get('exceptions'):
+                report_lines.extend([
+                    f"### Exceptions Found",
+                    f""
+                ])
+                for exc in summary_data['exceptions']:
+                    report_lines.append(f"- {exc}")
+                report_lines.append("")
+
+            # Tests
+            if summary_data.get('tests'):
+                report_lines.extend([
+                    f"### Tests Involved",
+                    f""
+                ])
+                for test in summary_data['tests']:
+                    report_lines.append(f"- {test}")
+                report_lines.append("")
+
+            # Assertion
+            if summary_data.get('assertion'):
+                report_lines.extend([
+                    f"### Assertion Details",
+                    f"",
+                    f"```",
+                    f"{summary_data['assertion']}",
+                    f"```",
+                    f""
+                ])
+
+        # Commit Attribution
+        if build_record.attribution:
+            attr = build_record.attribution
+            report_lines.extend([
+                f"## Suspected Commit",
+                f"",
+                f"- **SHA:** {attr.get('sha', 'N/A')}",
+                f"- **Author:** {attr.get('author', 'N/A')}",
+                f"- **Attribution Score:** {attr.get('score', 0)}",
+                f""
+            ])
+
+            if attr.get('changed_files'):
+                report_lines.extend([
+                    f"### Changed Files",
+                    f""
+                ])
+                for file_path in attr['changed_files']:
+                    report_lines.append(f"- {file_path}")
+                report_lines.append("")
+
+            if attr.get('tests_detected'):
+                report_lines.extend([
+                    f"### Related Tests",
+                    f""
+                ])
+                for test in attr['tests_detected']:
+                    report_lines.append(f"- {test}")
+                report_lines.append("")
+
+        # Build metadata
+        if build_record.metadata:
+            report_lines.extend([
+                f"## Build Metadata",
+                f""
+            ])
+            for key, value in build_record.metadata.items():
+                report_lines.append(f"- **{key}:** {value}")
+            report_lines.append("")
+
+        # Recent log lines
+        recent_events = build_record.events[-20:] if len(build_record.events) > 20 else build_record.events
+
+        if recent_events:
+            report_lines.extend([
+                f"## Recent Log Events",
+                f"",
+                f"```"
+            ])
+
+            for event in recent_events:
+                timestamp = event.timestamp or "??:??:??"
+                level = event.level or "INFO"
+                text = event.text or ""
+
+                report_lines.append(f"{timestamp} [{level}] {text}")
+
+            report_lines.extend([
+                f"```",
+                f""
+            ])
+
+        # Footer
+        report_lines.extend([
+            f"---",
+            f"*Generated by Automated Fault Tracing System*"
+        ])
+
+        return "\n".join(report_lines)
+
+    def generate_pdf_report(self, build_record: BuildRecord) -> bytes:
+        """
+        Generate PDF report using pandoc
+
+        Args:
+            build_record: Complete build record
+
+        Returns:
+            PDF content as bytes
+
+        Raises:
+            RuntimeError: If pandoc is not available or conversion fails
+        """
+        # Generate markdown first
+        markdown_content = self.generate_markdown_report(build_record)
+
+        # Create temporary files
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as md_file:
+            md_file.write(markdown_content)
+            md_file_path = md_file.name
+
+        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as pdf_file:
+            pdf_file_path = pdf_file.name
+
+        try:
+            # Run pandoc to convert markdown to PDF
+            subprocess.run([
+                'pandoc',
+                md_file_path,
+                '-o', pdf_file_path,
+                '--pdf-engine=pdflatex',
+                '--variable', 'geometry:margin=1in'
+            ], check=True, capture_output=True)
+
+            # Read PDF content
+            with open(pdf_file_path, 'rb') as pdf_file:
+                pdf_content = pdf_file.read()
+
+            return pdf_content
+
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"PDF generation failed: {e.stderr.decode()}")
+
+        except FileNotFoundError:
+            raise RuntimeError("pandoc not found - PDF generation not available")
+
+        finally:
+            # Clean up temporary files
+            try:
+                os.unlink(md_file_path)
+                os.unlink(pdf_file_path)
+            except OSError:
+                pass  # Ignore cleanup errors
+
+    def _format_timestamp(self, timestamp: float) -> str:
+        """Format Unix timestamp to readable string"""
+        import datetime
+        dt = datetime.datetime.fromtimestamp(timestamp)
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
